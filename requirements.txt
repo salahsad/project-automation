@@ -1,6 +1,6 @@
 dash ==2.6.0
 pandas
 gunicorn
-missingo==1.0.0
+missingo==0.5.2
 matplotlib
 sklearn
