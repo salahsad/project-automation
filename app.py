@@ -9,7 +9,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 # Création de l'application Dash
 app = Dash(__name__)
-
+server = app.server
 
 
 
