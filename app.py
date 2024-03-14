@@ -118,4 +118,4 @@ def update_output(n_clicks, input_recency, input_frequency, input_monetary):
 
 # Lancement de l'application Dash
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8051)
+    app.run_server(debug=True,host='0.0.0.0', port=8051)
