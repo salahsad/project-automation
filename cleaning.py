@@ -2,6 +2,8 @@ from main import *
 import re
 import missingno as msno
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+
 
 #GEOLOCATION TABLE
 # Drop duplicates data
@@ -100,5 +102,41 @@ df['product_category_name'] = df['product_category_name_english']
 df.drop(columns='product_category_name_english', inplace=True)
 
 #show
+"""
 msno.matrix(df, figsize=(20, 6))
-plt.show()
+plt.show()"""
+
+df['customercity'] = df['customer_city'].str.title()
+df['payment_type'] = df['payment_type'].str.replace('', ' ').str.title()
+
+# cleaning up name columns
+df['customer_city'] = df['customer_city'].str.title()
+df['payment_type'] = df['payment_type'].str.replace('_', ' ').str.title()
+# engineering new/essential columns
+df['delivery_against_estimated'] = (df['order_estimated_delivery_date'] - df['order_delivered_customer_date']).dt.days
+df['order_purchase_year'] = df.order_purchase_timestamp.apply(lambda x: x.year)
+df['order_purchase_month'] = df.order_purchase_timestamp.apply(lambda x: x.month)
+df['order_purchase_dayofweek'] = df.order_purchase_timestamp.apply(lambda x: x.dayofweek)
+df['order_purchase_hour'] = df.order_purchase_timestamp.apply(lambda x: x.hour)
+df['order_purchase_day'] = df['order_purchase_dayofweek'].map({0:'Mon',1:'Tue',2:'Wed',3:'Thu',4:'Fri',5:'Sat',6:'Sun'})
+df['order_purchase_mon'] = df.order_purchase_timestamp.apply(lambda x: x.month).map({1:'Jan',2:'Feb',3:'Mar',4:'Apr',5:'May',6:'Jun',7:'Jul',8:'Aug',9:'Sep',10:'Oct',11:'Nov',12:'Dec'})
+# Changing the month attribute for correct ordenation
+df['month_year'] = df['order_purchase_month'].astype(str).apply(lambda x: '0' + x if len(x) == 1 else x)
+df['month_year'] = df['order_purchase_year'].astype(str) + '-' + df['month_year'].astype(str)
+#creating year month column
+df['month_y'] = df['order_purchase_timestamp'].map(lambda date: 100*date.year + date.month)
+
+
+df['month_year'] = df['order_purchase_month'].astype(str).apply(lambda x: '0' + x if len(x) == 1 else x)
+df['month_year'] = df['order_purchase_year'].astype(str) + '-' + df['month_year'].astype(str)
+#creating year month column
+df['month_y'] = df['order_purchase_timestamp'].map(lambda date: 100*date.year + date.month)
+rfm = df.groupby('customer_unique_id').agg({
+    'order_purchase_timestamp': lambda x: (pd.to_datetime('2018-08-29 15:00:37') - pd.to_datetime(x.max())).days,
+    'order_id': 'count',
+    'payment_value': 'sum'
+}).reset_index()
+
+rfm.columns = ['customer_id', 'Recency', 'Frequency', 'Monetary']
+inertia = []
+X = rfm.drop(columns=['customer_id'])
