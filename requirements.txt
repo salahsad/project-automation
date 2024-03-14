@@ -3,4 +3,4 @@ pandas
 gunicorn
 missingno==0.5.2
 matplotlib
-sklearn
+scikit-learn
